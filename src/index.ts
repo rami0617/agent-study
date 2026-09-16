@@ -1,4 +1,4 @@
-import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import { query, tool, createSdkMcpServer, type AgentDefinition} from "@anthropic-ai/claude-agent-sdk";
 
 const getTimeTool = tool(
   'getTime',
@@ -18,15 +18,24 @@ const myServer = createSdkMcpServer({
   tools: [getTimeTool],
 });
 
+// 서브에이전트 정의
+const timeTeller: AgentDefinition = {
+  description: 'timeTellerAgent',
+  prompt: '너는 시간 조회 전담 에이전트다. get_time 도구를 써서 답해라',
+  tools:  ['mcp__server__getTime'],
+};
+
 async function main() {
   for await (const message of query({
-    prompt: "지금 몇 시야?",
+    prompt: "getTime 도구를 네가 직접 쓰지 말고, 반드시 timeTeller 서브에이전트한테 위임해서 시간을 확인해줘",
     options: {
       cwd: process.cwd(),
-      systemPrompt: "당신은 친절한 어시스턴트입니다.",
-      mcpServers: { 'server': myServer },
-      tools: [ 'mcp__server__getTime'],
-      allowedTools: [ 'mcp__server__getTime' ]
+      systemPrompt:'' , 
+      mcpServers: { server: myServer },
+      tools: ['Task'],
+      agents: {timeTeller},
+      allowedTools: ['mcp__server__getTime', 'Task'],
+      // disallowedTools: ['mcp__server__getTime'],
     },
   })) {
     console.log(JSON.stringify(message, null, 2));
