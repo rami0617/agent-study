@@ -25,21 +25,29 @@ const timeTeller: AgentDefinition = {
   tools:  ['mcp__server__getTime'],
 };
 
+const executor: AgentDefinition = {
+  description: '파일을 읽고 쓰는 실행 담당 에이전트. 시간 조회와 파일 생성/수정이 필요한 작업에 사용.',
+  prompt: '시간 조회와 파일 쓰기를 모두 수행하는 실행 에이전트다. mcp__server__getTime으로 시간을 확인하고, Write로 파일을 작성해라.',
+  tools: ['mcp__server__getTime', 'Write'],
+  disallowedTools: ['Task'], // 이 서브에이전트는 또 다른 서브에이전트를 부를 수 없게
+};
+
 async function main() {
   for await (const message of query({
-    prompt: "getTime 도구를 네가 직접 쓰지 말고, 반드시 timeTeller 서브에이전트한테 위임해서 시간을 확인해줘",
+    prompt: "workspace/note.txt 파일을 만들고, 그 안에 지금 시각을 적어줘",
     options: {
       cwd: process.cwd(),
-      systemPrompt:'' , 
+      systemPrompt: '',
       mcpServers: { server: myServer },
-      tools: ['Task'],
-      agents: {timeTeller},
-      allowedTools: ['mcp__server__getTime', 'Task'],
-      // disallowedTools: ['mcp__server__getTime'],
+      tools: ['Task', 'Write'],
+      allowedTools: ['mcp__server__getTime', 'Task', 'Write'],
+      agents: { executor }, 
+      maxTurns: 8,
     },
   })) {
     console.log(JSON.stringify(message, null, 2));
   }
 }
+
 
 main();
