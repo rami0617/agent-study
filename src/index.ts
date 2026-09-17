@@ -29,12 +29,12 @@ const executor: AgentDefinition = {
   description: '파일을 읽고 쓰는 실행 담당 에이전트. 시간 조회와 파일 생성/수정이 필요한 작업에 사용.',
   prompt: '시간 조회와 파일 쓰기를 모두 수행하는 실행 에이전트다. mcp__server__getTime으로 시간을 확인하고, Write로 파일을 작성해라.',
   tools: ['mcp__server__getTime', 'Write'],
-  disallowedTools: ['Task'], // 이 서브에이전트는 또 다른 서브에이전트를 부를 수 없게
+  disallowedTools: ['Task'], 
 };
 
 async function main() {
   for await (const message of query({
-    prompt: "workspace/note.txt 파일을 만들고, 그 안에 지금 시각을 적어줘",
+    prompt: "workspace/note.txt를 만들고 지금 시각을 적은 다음, 오늘 서울 날씨도 검색해서 같이 적어줘",
     options: {
       cwd: process.cwd(),
       systemPrompt: '',
