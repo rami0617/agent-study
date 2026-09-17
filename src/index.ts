@@ -33,20 +33,25 @@ const executor: AgentDefinition = {
 };
 
 async function main() {
-  for await (const message of query({
-    prompt: "workspace/note.txt를 만들고 지금 시각을 적은 다음, 오늘 서울 날씨도 검색해서 같이 적어줘",
-    options: {
-      cwd: process.cwd(),
-      systemPrompt: '',
-      mcpServers: { server: myServer },
-      tools: ['Task', 'Write'],
-      allowedTools: ['mcp__server__getTime', 'Task', 'Write'],
-      agents: { executor }, 
-      maxTurns: 8,
-    },
-  })) {
-    console.log(JSON.stringify(message, null, 2));
-  }
+  try {
+    for await (const message of query({
+      prompt: "workspace/note.txt를 만들고 지금 시각을 적은 다음, 오늘 서울 날씨도 검색해서 같이 적어줘",
+      options: {
+        cwd: process.cwd(),
+        systemPrompt: '',
+        mcpServers: { server: myServer },
+        tools: ['Task', 'Write'],
+        allowedTools: ['mcp__server__getTime', 'Task', 'Write'],
+        agents: { executor }, 
+        maxTurns: 8,
+        maxBudgetUsd: 0.05
+      },
+    })) {
+      console.log(JSON.stringify(message, null, 2));
+    }
+  } catch(err) {
+    console.error("쿼리 중단:", err instanceof Error ? err.message : err);
+}
 }
 
 
